@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   Request,
   UseGuards,
   UsePipes,
@@ -14,7 +15,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BooksService } from './books.service';
-import { CreateBookDto, UpdateBookDto } from './dto/book.dto';
+import { CreateBookDto, FilterBooksDto, UpdateBookDto } from './dto/book.dto';
 
 @Controller('books')
 @UseGuards(JwtAuthGuard)
@@ -28,8 +29,8 @@ export class BooksController {
   }
 
   @Get()
-  findAll(@Request() req: any) {
-    return this.booksService.findAll(req.user.userId);
+  findAll(@Query() filterDto: FilterBooksDto, @Request() req: any) {
+    return this.booksService.findAll(req.user.userId, filterDto);
   }
 
   @Get('my-books')

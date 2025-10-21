@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { CreateBookDto, UpdateBookDto } from './dto/book.dto';
+import { CreateBookDto, FilterBooksDto, UpdateBookDto } from './dto/book.dto';
 
 @Injectable()
 export class BooksService {
@@ -56,11 +56,33 @@ export class BooksService {
     return this.transformBookResponse(book);
   }
 
-  async findAll(userId: number) {
+  async findAll(userId: number, filterDto?: FilterBooksDto) {
+    const {
+      search,
+      language,
+      sortBy = 'published_at',
+      sortOrder = 'desc',
+    } = filterDto || {};
+
+    const whereClause: any = {
+      published: true,
+    };
+
+    if (search) {
+      whereClause.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { sub_title: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+        { author: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    if (language) {
+      whereClause.language = { contains: language, mode: 'insensitive' };
+    }
+
     const books = await this.prisma.book.findMany({
-      where: {
-        published: true,
-      },
+      where: whereClause,
       include: {
         created_by: {
           select: {
@@ -72,7 +94,7 @@ export class BooksService {
         },
       },
       orderBy: {
-        created_at: 'desc',
+        [sortBy]: sortOrder,
       },
     });
 

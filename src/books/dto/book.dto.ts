@@ -1,10 +1,39 @@
 import {
   IsBoolean,
   IsDateString,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
 } from 'class-validator';
+
+export enum SortOrder {
+  ASC = 'asc',
+  DESC = 'desc',
+}
+
+export enum SortField {
+  TITLE = 'title',
+  PUBLISHED_AT = 'published_at',
+}
+
+export class FilterBooksDto {
+  @IsString()
+  @IsOptional()
+  search?: string;
+
+  @IsString()
+  @IsOptional()
+  language?: string;
+
+  @IsEnum(SortField)
+  @IsOptional()
+  sortBy?: SortField;
+
+  @IsEnum(SortOrder)
+  @IsOptional()
+  sortOrder?: SortOrder;
+}
 
 export class CreateBookDto {
   @IsString()
